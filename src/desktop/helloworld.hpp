@@ -34,6 +34,8 @@ class HelloWorld: public Gtk::Window {
 private:
 	RomsetCollection m_romsets;
 
+
+	void creatTitlebar();
 public:
 	HelloWorld();
 	virtual ~HelloWorld();
@@ -51,6 +53,8 @@ protected:
 	Gtk::Button m_button;
 	Gtk::Button m_folder_button;
 	Gtk::Box m_ButtonBox;
+
+	Gtk::HeaderBar m_headerbar;
 
 	Sidebar m_sidebar;
 

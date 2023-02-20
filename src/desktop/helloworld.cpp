@@ -8,8 +8,7 @@
 
 HelloWorld::HelloWorld() :
 		m_button("Load Dat file"), // creates a new button with label "Hello World".
-		m_folder_button("Scan directory"),
-		m_sidebar(&m_romsets){
+		m_folder_button("Scan directory"), m_sidebar(&m_romsets) {
 
 	set_size_request(500, 500);
 	m_button.signal_clicked().connect(
@@ -51,15 +50,25 @@ HelloWorld::HelloWorld() :
 	Json::Value root;
 	std::ifstream myfile;
 	myfile.open("example.txt");
-	myfile >> root;
-	myfile.close();
-	std::cout << root << std::endl;
+	if (myfile.is_open()) {
+		myfile >> root;
+		myfile.close();
+		std::cout << root << std::endl;
 
-	for (int index = 0; index < root.size(); ++index) {
-		this->m_romsets.add(
-				root[index][0].asString(),
-				root[index][1].asString());
+		for (int index = 0; index < root.size(); ++index) {
+			this->m_romsets.add(root[index][0].asString(),
+					root[index][1].asString());
+		}
 	}
+
+	creatTitlebar();
+}
+
+void HelloWorld::creatTitlebar(){
+	Gtk::Button btn;
+	btn.set_image_from_icon_name("list-add");
+	m_headerbar.pack_start(btn);
+	set_titlebar(m_headerbar);
 }
 
 HelloWorld::~HelloWorld() {
@@ -133,8 +142,7 @@ void HelloWorld::on_file_dialog_response(int response_id,
 		//Notice that this is a std::string, not a Glib::ustring.
 		auto filename = dialog->get_file()->get_path();
 		std::cout << "File selected: " << filename << std::endl;
-		this->m_romsets.add(filename,
-				"/home/nickj/Dokumente/Romsets/");
+		this->m_romsets.add(filename, "/home/nickj/Dokumente/Romsets/");
 		break;
 	}
 	case Gtk::ResponseType::CANCEL: {
@@ -169,7 +177,7 @@ void HelloWorld::on_folder_dialog_response(int response_id,
 			 if(romfile.size() == rom.size() and romfile.md5() == rom.md5())
 			 std::cout << "found match:" << rom << std::endl;
 			 }*/
-			for(auto romset : m_romsets){
+			for (auto romset : m_romsets) {
 				if (romset.contains(&romfile)) {
 					std::cout << "found match:" << romfile << std::endl;
 					romset.import(romfile.path(), &romfile);

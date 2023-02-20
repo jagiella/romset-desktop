@@ -1,5 +1,6 @@
 #include "helloworld.hpp"
 #include <gtkmm/application.h>
+#include <gtkmm/headerbar.h>
 
 int main(int argc, char *argv[]) {
 	auto app = Gtk::Application::create("org.gtkmm.example");
