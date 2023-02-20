@@ -11,10 +11,13 @@
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
 #include <gtkmm/dialog.h>
+#include <gtkmm/paned.h>
 #include <gtkmm/filechooser.h>
 #include <gtkmm.h>
 
 #include "Romset.hpp"
+#include "Sidebar.hpp"
+
 
 class ModelColumns: public Gtk::TreeModelColumnRecord {
 public:
@@ -29,7 +32,7 @@ public:
 class HelloWorld: public Gtk::Window {
 
 private:
-	std::list<Romset> m_romsets;
+	RomsetCollection m_romsets;
 
 public:
 	HelloWorld();
@@ -48,6 +51,10 @@ protected:
 	Gtk::Button m_button;
 	Gtk::Button m_folder_button;
 	Gtk::Box m_ButtonBox;
+
+	Sidebar m_sidebar;
+
+	Gtk::Paned m_Paned;
 	Gtk::TreeView m_tree;
 	ModelColumns m_Columns;
 	Gtk::TreeRow m_Row_matched;

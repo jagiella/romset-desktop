@@ -1,13 +1,15 @@
 #include "helloworld.hpp"
 #include "RomFile.hpp"
 #include <iostream>
-
+#include <fstream>
 #include <filesystem>
 #include <gtkmm.h>
+#include <jsoncpp/json/json.h>
 
 HelloWorld::HelloWorld() :
 		m_button("Load Dat file"), // creates a new button with label "Hello World".
-		m_folder_button("Scan directory") {
+		m_folder_button("Scan directory"),
+		m_sidebar(&m_romsets){
 
 	set_size_request(500, 500);
 	m_button.signal_clicked().connect(
@@ -38,14 +40,43 @@ HelloWorld::HelloWorld() :
 	// This packs the button into the Window (a container).
 	m_ButtonBox.append(m_button);
 	m_ButtonBox.append(m_folder_button);
-	m_ButtonBox.append(scroll);
-	this->set_child(m_ButtonBox);
+	//m_ButtonBox.append(scroll);
+	m_Paned.set_start_child(m_sidebar);
+	m_Paned.set_end_child(scroll);
+	this->set_child(m_Paned);
 
 	// The final step is to display this newly created widget...
 	m_button.show();
+
+	Json::Value root;
+	std::ifstream myfile;
+	myfile.open("example.txt");
+	myfile >> root;
+	myfile.close();
+	std::cout << root << std::endl;
+
+	for (int index = 0; index < root.size(); ++index) {
+		this->m_romsets.add(
+				root[index][0].asString(),
+				root[index][1].asString());
+	}
 }
 
 HelloWorld::~HelloWorld() {
+	Json::Value root;
+
+	for (auto romset : m_romsets) {
+		Json::Value v_romset;
+		v_romset.append(romset.filename());
+		v_romset.append(romset.directory());
+		root.append(v_romset);
+	}
+	std::cout << root << std::endl;
+
+	std::ofstream myfile;
+	myfile.open("example.txt");
+	myfile << root;
+	myfile.close();
 }
 
 void HelloWorld::on_button_clicked() {
@@ -102,7 +133,8 @@ void HelloWorld::on_file_dialog_response(int response_id,
 		//Notice that this is a std::string, not a Glib::ustring.
 		auto filename = dialog->get_file()->get_path();
 		std::cout << "File selected: " << filename << std::endl;
-		this->m_romsets.emplace_back(filename, "/home/nickj/Dokumente/Romsets/");
+		this->m_romsets.add(filename,
+				"/home/nickj/Dokumente/Romsets/");
 		break;
 	}
 	case Gtk::ResponseType::CANCEL: {
@@ -137,18 +169,20 @@ void HelloWorld::on_folder_dialog_response(int response_id,
 			 if(romfile.size() == rom.size() and romfile.md5() == rom.md5())
 			 std::cout << "found match:" << rom << std::endl;
 			 }*/
-			if (m_romsets.back().contains(&romfile)) {
-				std::cout << "found match:" << romfile << std::endl;
-				m_romsets.back().import(romfile.path(), &romfile);
-				auto row_child = *m_refTreeStore->append(
-						m_Row_matched.children());
-				row_child[m_Columns.m_col_text] = romfile.name();
-				count++;
-			} else {
-				auto row_child = *m_refTreeStore->append(
-						m_Row_unmatched.children());
-				row_child[m_Columns.m_col_text] = romfile.name();
-				//m_Row_unmatched.
+			for(auto romset : m_romsets){
+				if (romset.contains(&romfile)) {
+					std::cout << "found match:" << romfile << std::endl;
+					romset.import(romfile.path(), &romfile);
+					auto row_child = *m_refTreeStore->append(
+							m_Row_matched.children());
+					row_child[m_Columns.m_col_text] = romfile.name();
+					count++;
+				} else {
+					auto row_child = *m_refTreeStore->append(
+							m_Row_unmatched.children());
+					row_child[m_Columns.m_col_text] = romfile.name();
+					//m_Row_unmatched.
+				}
 			}
 		}
 		break;
