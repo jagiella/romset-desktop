@@ -13,6 +13,10 @@ std::ostream& operator<<(std::ostream &stream, const Rom &rom) {
 	return stream << "Rom(" << rom.name() << ", size=" << rom.size() << ")";
 }
 
+Romset::Romset(std::string name): m_name(name){
+	std::cout << "Create romset: " << std::endl;
+	std::cout << "-> name: " << name << std::endl;
+}
 
 Romset::Romset(std::string filename, std::string directory) :
 		m_filename(filename), m_directory(directory) {
@@ -26,6 +30,11 @@ Romset::Romset(std::string filename, std::string directory) :
 			"header");
 	const char *name = header->FirstChildElement("name")->GetText();
 	std::cout << "-> name: " << name << std::endl;
+	m_name = name;
+
+	const char *version = header->FirstChildElement("version")->GetText();
+	std::cout << "-> version: " << version << std::endl;
+	m_version = version;
 
 	// games
 	auto game = doc.FirstChildElement("datafile")->FirstChildElement("game");
@@ -41,13 +50,14 @@ Romset::Romset(std::string filename, std::string directory) :
 		const char *md5 = e_rom->Attribute("md5");
 
 		//m_roms.emplace_back(name, filename, size, crc, md5);
-		std::cout << "-> add: " << std::endl;
+		//std::cout << "-> add: " << std::endl;
 		//m_roms[md5] = Rom(name, filename, size, crc, md5);
 		m_roms.insert(std::make_pair<std::string, Rom>(md5, { name, filename,
 				size, crc, md5 }));
 		//std::cout << "-> rom: " << m_roms.back() << std::endl;
 		game = game->NextSiblingElement("game");
 	}
+	std::cout << "-> added: " << m_roms.size() << " roms" << std::endl;
 }
 
 Romset::~Romset() {
@@ -57,6 +67,16 @@ Romset::~Romset() {
 const std::string Romset::name() {
 
 	return m_filename;
+}
+const std::string Romset::version() {
+
+	return m_version;
+}
+
+void Romset::set_version(std::string version) {
+
+	m_version = version;
+	std::cout << "-> version: " << version << std::endl;
 }
 
 std::unordered_map<std::string, Rom> Romset::roms() {

@@ -17,7 +17,7 @@
 
 #include "Romset.hpp"
 #include "Sidebar.hpp"
-
+#include "Headerbar.hpp"
 
 class ModelColumns: public Gtk::TreeModelColumnRecord {
 public:
@@ -54,7 +54,7 @@ protected:
 	Gtk::Button m_folder_button;
 	Gtk::Box m_ButtonBox;
 
-	Gtk::HeaderBar m_headerbar;
+	Headerbar m_headerbar;
 
 	Sidebar m_sidebar;
 

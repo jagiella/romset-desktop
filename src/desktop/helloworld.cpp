@@ -8,7 +8,7 @@
 
 HelloWorld::HelloWorld() :
 		m_button("Load Dat file"), // creates a new button with label "Hello World".
-		m_folder_button("Scan directory"), m_sidebar(&m_romsets) {
+		m_folder_button("Scan directory"), m_sidebar(&m_romsets), m_headerbar() {
 
 	set_size_request(500, 500);
 	m_button.signal_clicked().connect(
@@ -49,7 +49,7 @@ HelloWorld::HelloWorld() :
 
 	Json::Value root;
 	std::ifstream myfile;
-	myfile.open("example.txt");
+	myfile.open("/home/nickj/Downloads/stuff/example.json");
 	if (myfile.is_open()) {
 		myfile >> root;
 		myfile.close();
@@ -61,13 +61,17 @@ HelloWorld::HelloWorld() :
 		}
 	}
 
-	creatTitlebar();
+	//creatTitlebar();
+	this->set_titlebar(m_headerbar);
 }
 
-void HelloWorld::creatTitlebar(){
+void HelloWorld::creatTitlebar() {
 	Gtk::Button btn;
 	btn.set_image_from_icon_name("list-add");
+	Gtk::Button btn2;
+	btn2.set_image_from_icon_name("folder-saved-search");
 	m_headerbar.pack_start(btn);
+	m_headerbar.pack_start(btn2);
 	set_titlebar(m_headerbar);
 }
 

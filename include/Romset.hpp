@@ -43,15 +43,19 @@ public:
 
 class Romset {
 private:
+	std::string m_name, m_version;
 	std::string m_filename;
 	std::string m_directory;
 	std::unordered_map<std::string, Rom> m_roms;
 
 public:
+	Romset(std::string name);
 	Romset(std::string filename, std::string directory);
 	~Romset();
 
 	const std::string name();
+	const std::string version();
+	void set_version(std::string version);
 	std::unordered_map<std::string, Rom> roms();
 	bool contains(Rom *rom);
 	void import(std::string filepath, Rom *rom);
@@ -83,6 +87,10 @@ private:
 public:
 	Signal<Romset*> added;
 	Signal<Romset*> removed;
+	void add(std::string name){
+		m_romsets.emplace_back(name);
+		added.emit(&m_romsets.back());
+	}
 	void add(std::string filename, std::string directory){
 		m_romsets.emplace_back(filename, directory);
 		added.emit(&m_romsets.back());
@@ -92,6 +100,9 @@ public:
 	}
 	auto begin(){
 		return m_romsets.begin();
+	}
+	auto back(){
+		return m_romsets.back();
 	}
 };
 

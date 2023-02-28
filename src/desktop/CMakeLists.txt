@@ -6,6 +6,7 @@ add_executable(hello
 	main.cpp 
 	helloworld.cpp
 	Sidebar.cpp
+	Headerbar.cpp
 	)
 	
 target_include_directories(hello PRIVATE ${CMAKE_SOURCE_DIR}/include ${GTK_INCLUDE_DIRS})
