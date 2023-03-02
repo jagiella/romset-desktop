@@ -8,8 +8,11 @@
 
 HelloWorld::HelloWorld() :
 		m_button("Load Dat file"), // creates a new button with label "Hello World".
-		m_folder_button("Scan directory"), m_sidebar(&m_romsets), m_headerbar() {
+		m_folder_button("Scan directory"),
+		m_sidebar(&m_romsets),
+		m_headerbar() {
 
+	std::cout << "HelloWorld()" << std::endl;
 	set_size_request(500, 500);
 	m_button.signal_clicked().connect(
 			sigc::mem_fun(*this, &HelloWorld::on_button_clicked));
@@ -49,7 +52,8 @@ HelloWorld::HelloWorld() :
 
 	Json::Value root;
 	std::ifstream myfile;
-	myfile.open("/home/nickj/Downloads/stuff/example.json");
+	std::cout << "read config" << std::endl;
+	myfile.open("/home/nick/Downloads/example.json");
 	if (myfile.is_open()) {
 		myfile >> root;
 		myfile.close();

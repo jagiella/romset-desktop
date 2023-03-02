@@ -50,7 +50,6 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems,
 Response::Response(std::string &text) :
 		m_text(text) {
 }
-;
 
 Response Requests::get(std::string url) {
 	//CURL *curl;
@@ -127,10 +126,20 @@ std::string Requests::header(std::string url) {
 	}
 }
 
-RomsetCatalogueNointro::RomsetCatalogueNointro(std::string url =
-		"/home/nickj/Downloads/redump.org.html") :
+RomsetCatalogueNointro::RomsetCatalogueNointro(std::string url) :
 		m_url(url) {
-	update();
+	std::cout << "RomsetCatalogueNointro()" << std::endl;
+	//std::cout << "RomsetCatalogueNointro::update()" << std::endl;
+	//update();
+	//std::cout << "RomsetCatalogueNointro::update() finished" << std::endl;
+}
+
+Romset* RomsetCatalogueNointro::find(std::string romset_name){
+	for(auto& romset : m_romsets){
+		if(romset.name() == romset_name)
+			return &romset;
+	}
+	return 0;
 }
 
 GumboNode* findFirstChild(GumboNode *node, GumboTag tag, const char *id = 0) {
@@ -178,7 +187,7 @@ void printChildren(GumboNode *node, int indent = 0) {
 }
 
 void RomsetCatalogueNointro::update() {
-	std::ifstream in("/home/nickj/Downloads/redump.org.html",
+	std::ifstream in("/home/nick/Downloads/redump.org.html",
 			std::ios::in | std::ios::binary);
 	std::string contents;
 	in.seekg(0, std::ios::end);
@@ -224,18 +233,19 @@ void RomsetCatalogueNointro::update() {
 
 			auto filename = Requests::header(attr->value);
 
-			std::string name="", version="";
+			std::string name = "", version = "";
 
 			std::string::size_type pos = filename.find(" - Datfile");
 			if (pos != std::string::npos)
 				name = filename.substr(0, pos);
 
-			auto pos1 = filename.find_last_of('(')+1;
+			auto pos1 = filename.find_last_of('(') + 1;
 			auto pos2 = filename.find_last_of(')');
-			version = filename.substr(pos1, pos2-pos1);
+			version = filename.substr(pos1, pos2 - pos1);
 
 			m_romsets.add(name);
 			m_romsets.back().set_version(version);
 		}
 	}
+
 }

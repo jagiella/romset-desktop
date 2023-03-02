@@ -101,7 +101,7 @@ public:
 	auto begin(){
 		return m_romsets.begin();
 	}
-	auto back(){
+	auto& back(){
 		return m_romsets.back();
 	}
 };

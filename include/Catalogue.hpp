@@ -32,9 +32,9 @@ private:
 	std::string m_url;
 	RomsetCollection m_romsets;
 public:
-	RomsetCatalogueNointro(std::string url);
+	RomsetCatalogueNointro(std::string url = "/home/nickj/Downloads/redump.org.html");
 	void update();
-
+	Romset* find(std::string romset_name);
 };
 
 #endif /* SRC_LIB_CATALOGUE_HPP_ */
