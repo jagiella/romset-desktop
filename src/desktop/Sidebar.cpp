@@ -16,11 +16,11 @@
 Sidebar::Sidebar(RomsetCollection *romsets):
 	m_romsets(romsets)
 {
-	auto glambda = [this](Romset* rs) { this->onRomsetAdded(rs); };
+	auto glambda = [this](std::shared_ptr<Romset> rs) { this->onRomsetAdded(rs); };
 	romsets->added.connect(glambda);
 
 	for (auto romset: *m_romsets){
-		auto &btn = m_buttons.emplace_back(romset.name());
+		auto &btn = m_buttons.emplace_back(romset->name());
 		//btn.set_label(romset.name());
 		//btn.set_icon_name("applications-games");
 		//btn.set_name(romset.name());
@@ -29,7 +29,7 @@ Sidebar::Sidebar(RomsetCollection *romsets):
 
 	this->set_child(m_listBox);
 }
-void Sidebar::onRomsetAdded(Romset* romset){
+void Sidebar::onRomsetAdded(std::shared_ptr<Romset> romset){
 	std::cout << "Romset added" << std::endl;
 
 	auto box = Gtk::Box();

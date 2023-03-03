@@ -50,7 +50,7 @@ HelloWorld::HelloWorld() :
 	// The final step is to display this newly created widget...
 	m_button.show();
 
-	Json::Value root;
+	/*Json::Value root;
 	std::ifstream myfile;
 	std::cout << "read config" << std::endl;
 	myfile.open("/home/nick/Downloads/example.json");
@@ -62,6 +62,16 @@ HelloWorld::HelloWorld() :
 		for (int index = 0; index < root.size(); ++index) {
 			this->m_romsets.add(root[index][0].asString(),
 					root[index][1].asString());
+		}
+	}*/
+	std::filesystem::path home = getenv("HOME");
+	std::filesystem::path path = home / ".config" / "romset";
+	std::filesystem::create_directories(path);
+
+	for (auto datfile : std::filesystem::directory_iterator(path)) {
+		if (datfile.path().extension() == ".dat") {
+			std::cout << "Found:" << datfile << std::endl;
+			this->m_romsets.add(path / datfile, "");
 		}
 	}
 
@@ -84,8 +94,8 @@ HelloWorld::~HelloWorld() {
 
 	for (auto romset : m_romsets) {
 		Json::Value v_romset;
-		v_romset.append(romset.filename());
-		v_romset.append(romset.directory());
+		v_romset.append(romset->filename());
+		v_romset.append(romset->directory());
 		root.append(v_romset);
 	}
 	std::cout << root << std::endl;
@@ -186,9 +196,9 @@ void HelloWorld::on_folder_dialog_response(int response_id,
 			 std::cout << "found match:" << rom << std::endl;
 			 }*/
 			for (auto romset : m_romsets) {
-				if (romset.contains(&romfile)) {
+				if (romset->contains(&romfile)) {
 					std::cout << "found match:" << romfile << std::endl;
-					romset.import(romfile.path(), &romfile);
+					romset->import(romfile.path(), &romfile);
 					auto row_child = *m_refTreeStore->append(
 							m_Row_matched.children());
 					row_child[m_Columns.m_col_text] = romfile.name();

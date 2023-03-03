@@ -21,7 +21,7 @@ private:
 	Gtk::ListBox m_listBox;
 public:
 	Sidebar(RomsetCollection *romsets);
-	void onRomsetAdded(Romset* romset);
+	void onRomsetAdded(std::shared_ptr<Romset> romset);
 };
 
 
