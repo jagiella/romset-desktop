@@ -22,8 +22,8 @@ public:
 class Requests {
 public:
 	static Response get(std::string url);
-	static std::string header(std::string url);
-	static void download(std::string url, std::string filename);
+	static std::string header(const std::string url);
+	static void download(const std::string url, std::ofstream &out);
 };
 
 

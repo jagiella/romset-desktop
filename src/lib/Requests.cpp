@@ -11,7 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <curl/curl.h>
-#include <zip.h>
+
 
 static int writer(char *data, size_t size, size_t nmemb,
 		std::string *writerData) {
@@ -73,7 +73,7 @@ Response Requests::get(std::string url) {
 		//return false;
 	}
 
-	code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
+	code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 0L);
 	if (code != CURLE_OK) {
 		fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);
 		//return false;
@@ -127,10 +127,10 @@ size_t write_data(const char *ptr, size_t size, size_t nmemb,
 	return size * nmemb;
 }
 
-void Requests::download(std::string url, std::string filename) {
+void Requests::download(const std::string url, std::ofstream &out) {
 	CURL *curl = curl_easy_init();
 	if (curl) {
-		std::ofstream out(filename, std::ios::out | std::ios::binary);
+		//std::ofstream out(filename, std::ios::out | std::ios::binary);
 		//fp = fopen(filename, "wb");
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
@@ -142,7 +142,7 @@ void Requests::download(std::string url, std::string filename) {
 	}
 
 	//int main()
-	{
+	/*{
 		//Open the ZIP archive
 		int err = 0;
 		zip *z = zip_open(filename.c_str(), 0, &err);
@@ -180,5 +180,5 @@ void Requests::download(std::string url, std::string filename) {
 			//delete allocated memory
 			delete[] contents;
 		}
-	}
+	}*/
 }

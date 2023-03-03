@@ -72,25 +72,25 @@ const std::string Romset::name() {
 	return m_name;
 }
 const std::string Romset::version() {
-	std::cout << m_version << std::endl;
+	//std::cout << m_version << std::endl;
 	return m_version;
 }
 
 void Romset::set_version(std::string version) {
 
 	m_version = version;
-	std::cout << "-> version: " << version << std::endl;
+	//std::cout << "-> version: " << version << std::endl;
 }
 
 const std::string Romset::url() {
-	std::cout << m_url << std::endl;
+	//std::cout << m_url << std::endl;
 	return m_url;
 }
 
 void Romset::set_url(std::string url) {
 
 	m_url = url;
-	std::cout << "-> url: " << url << std::endl;
+	//std::cout << "-> url: " << url << std::endl;
 }
 
 std::unordered_map<std::string, Rom> Romset::roms() {

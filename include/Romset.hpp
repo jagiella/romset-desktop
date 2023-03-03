@@ -14,6 +14,7 @@
 #include <ostream>
 #include <list>
 #include <functional>
+#include <memory>
 
 
 class Rom {
@@ -87,23 +88,41 @@ public:
 
 class RomsetCollection {
 private:
-	std::list<Romset> m_romsets;
+	std::list<std::shared_ptr<Romset>> m_romsets;
 public:
-	Signal<Romset*> added;
-	Signal<Romset*> removed;
+	Signal<std::shared_ptr<Romset>> added;
+	Signal<std::shared_ptr<Romset>> removed;
 	void add(std::string name){
-		m_romsets.emplace_back(name);
-		added.emit(&m_romsets.back());
+		m_romsets.push_back(std::make_shared<Romset>(name));
+		//m_romsets.emplace_back(name);
+		added.emit(m_romsets.back());
 	}
 	void add(std::string filename, std::string directory){
-		m_romsets.emplace_back(filename, directory);
-		added.emit(&m_romsets.back());
+		m_romsets.push_back(std::make_shared<Romset>(filename, directory));
+		//m_romsets.emplace_back(filename, directory);
+		added.emit(m_romsets.back());
+	}
+	void remove(std::shared_ptr<Romset> rs){
+		m_romsets.remove(rs);
+	}
+	std::list<std::shared_ptr<Romset>>::iterator erase(std::list<std::shared_ptr<Romset>>::iterator rs){
+		return m_romsets.erase(rs);
+	}
+	std::shared_ptr<Romset> find(std::string name){
+		for(auto romset : m_romsets){
+			if(romset->name() == name)
+				return romset;
+		}
+		return 0;
 	}
 	auto end(){
 		return m_romsets.end();
 	}
 	auto begin(){
 		return m_romsets.begin();
+	}
+	auto cbegin(){
+		return m_romsets.cbegin();
 	}
 	auto& back(){
 		return m_romsets.back();

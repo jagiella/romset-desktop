@@ -8,7 +8,6 @@
 #include "Catalogue.hpp"
 #include "Requests.hpp"
 
-
 #include <ostream>
 #include <iostream>
 #include <fstream>
@@ -18,8 +17,7 @@
 #include <libxml/tree.h>
 #include <libxml/HTMLparser.h>
 #include <gumbo.h>
-
-
+#include <zip.h>
 
 RomsetCatalogueNointro::RomsetCatalogueNointro(std::string url) :
 		m_url(url) {
@@ -29,10 +27,10 @@ RomsetCatalogueNointro::RomsetCatalogueNointro(std::string url) :
 	//std::cout << "RomsetCatalogueNointro::update() finished" << std::endl;
 }
 
-Romset* RomsetCatalogueNointro::find(std::string romset_name){
-	for(auto& romset : m_romsets){
-		if(romset.name() == romset_name)
-			return &romset;
+std::shared_ptr<Romset> RomsetCatalogueNointro::find(std::string romset_name) {
+	for (auto &romset : m_romsets) {
+		if (romset->name() == romset_name)
+			return romset;
 	}
 	return 0;
 }
@@ -82,14 +80,18 @@ void printChildren(GumboNode *node, int indent = 0) {
 }
 
 void RomsetCatalogueNointro::update() {
-	std::ifstream in("/home/nick/Downloads/redump.org.html",
-			std::ios::in | std::ios::binary);
-	std::string contents;
-	in.seekg(0, std::ios::end);
-	contents.resize(in.tellg());
-	in.seekg(0, std::ios::beg);
-	in.read(&contents[0], contents.size());
-	in.close();
+	/*std::ifstream in("/home/nick/Downloads/redump.org.html",
+	 std::ios::in | std::ios::binary);
+	 std::string contents;
+	 in.seekg(0, std::ios::end);
+	 contents.resize(in.tellg());
+	 in.seekg(0, std::ios::beg);
+	 in.read(&contents[0], contents.size());
+	 in.close();*/
+	std::string base_url = "http://redump.org";
+	Response res = Requests::get(base_url + "/downloads");
+	std::string contents = res.text();
+	std::cout << contents << std::endl;
 
 	auto options = kGumboDefaultOptions;
 	GumboOutput *output = gumbo_parse_with_options(&options, contents.data(),
@@ -126,7 +128,8 @@ void RomsetCatalogueNointro::update() {
 					"href");
 			std::cout << attr->value << std::endl;
 
-			auto filename = Requests::header(attr->value);
+			std::string url = base_url + attr->value;
+			auto filename = Requests::header(url);
 
 			std::string name = "", version = "";
 
@@ -139,15 +142,65 @@ void RomsetCatalogueNointro::update() {
 			version = filename.substr(pos1, pos2 - pos1);
 
 			m_romsets.add(name);
-			m_romsets.back().set_version(version);
-			m_romsets.back().set_url(attr->value);
+			m_romsets.back()->set_version(version);
+			m_romsets.back()->set_url(url);
 		}
 	}
 
 }
 
+std::filesystem::path RomsetCatalogueNointro::download(std::shared_ptr<Romset> romset, std::filesystem::path directory) {
+	std::filesystem::path filename_out;
 
-void RomsetCatalogueNointro::download(Romset* romset, std::string path){
-	std::cout << "download [" << romset->url() << "] to " << path << std::endl;
-	Requests::download(romset->url(), path);
+	std::cout << "download [" << romset->url() << "] to " << directory << std::endl;
+
+	std::string tmpfilename = std::tmpnam(nullptr);
+	{
+		std::ofstream tmpfile(tmpfilename, std::ios::out | std::ios::binary);
+		Requests::download(romset->url(), tmpfile);
+	}
+	{
+		//Open the ZIP archive
+		int err = 0;
+		zip *z = zip_open(tmpfilename.c_str(), 0, &err);
+		int num_files = zip_get_num_entries(z, ZIP_FL_UNCHANGED);
+		std::cout << "contains files: " << num_files << std::endl;
+
+		for (int i = 0; i < num_files; i++) {
+
+			//Search for the file of given name
+			//const char *name =
+			//		"Sony - PlayStation 2 - Datfile (11091) (2023-03-03 00-34-31).dat";
+			struct zip_stat st;
+			zip_stat_init(&st);
+			zip_stat_index(z, i, 0, &st);
+			const char *name = zip_get_name(z, i, ZIP_FL_ENC_RAW);
+			std::cout << "contains file: " << name << std::endl;
+			filename_out = directory / std::string(name);
+			std::ofstream out(directory / std::string(name),
+					std::ios::out | std::ios::binary);
+			//zip_stat(z, name, 0, &st);
+
+			//Alloc memory for its uncompressed contents
+			char *contents = new char[st.size];
+
+			//Read the compressed file
+			//zip_file *f = zip_fopen(z, name, 0);
+			zip_file *f = zip_fopen_index(z, i, 0);
+			zip_fread(f, contents, st.size);
+			zip_fclose(f);
+
+			//And close the archive
+			zip_close(z);
+
+			//Do something with the contents
+
+			out.write(contents, st.size);
+			//delete allocated memory
+			delete[] contents;
+		}
+	}
+	std::remove(tmpfilename.c_str());
+
+	return filename_out;
 }
