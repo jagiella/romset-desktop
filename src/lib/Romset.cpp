@@ -82,6 +82,17 @@ void Romset::set_version(std::string version) {
 	std::cout << "-> version: " << version << std::endl;
 }
 
+const std::string Romset::url() {
+	std::cout << m_url << std::endl;
+	return m_url;
+}
+
+void Romset::set_url(std::string url) {
+
+	m_url = url;
+	std::cout << "-> url: " << url << std::endl;
+}
+
 std::unordered_map<std::string, Rom> Romset::roms() {
 	return m_roms;
 }

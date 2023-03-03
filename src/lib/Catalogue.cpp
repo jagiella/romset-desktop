@@ -6,9 +6,9 @@
  */
 
 #include "Catalogue.hpp"
-#include "XML.hpp"
+#include "Requests.hpp"
 
-#include <curl/curl.h>
+
 #include <ostream>
 #include <iostream>
 #include <fstream>
@@ -19,112 +19,7 @@
 #include <libxml/HTMLparser.h>
 #include <gumbo.h>
 
-static int writer(char *data, size_t size, size_t nmemb,
-		std::string *writerData) {
-	if (writerData == NULL)
-		return 0;
 
-	writerData->append(data, size * nmemb);
-
-	return size * nmemb;
-}
-
-static size_t header_callback(char *buffer, size_t size, size_t nitems,
-		std::string *filename) {
-	/* received header is nitems * size long in 'buffer' NOT ZERO TERMINATED */
-	/* 'userdata' is set with CURLOPT_HEADERDATA */
-
-	std::string s(buffer, nitems);
-	if (s.rfind("Content-Disposition", 0) == 0) { // pos=0 limits the search to the prefix
-		// s starts with prefix
-		//std::cout << "GOT HEADER LINE: " << s << std::endl;
-		int pos = 43;
-		int n = s.size() - pos - 3;
-		filename[0] = s.substr(pos, n);
-		//std::cout << filename[0] << std::endl;
-	}
-
-	return nitems * size;
-}
-
-Response::Response(std::string &text) :
-		m_text(text) {
-}
-
-Response Requests::get(std::string url) {
-	//CURL *curl;
-	char errorBuffer[CURL_ERROR_SIZE];
-	std::string buffer;
-	/* In windows, this will init the winsock stuff */
-	curl_global_init(CURL_GLOBAL_ALL);
-
-	CURLcode code;
-
-	CURL *conn = curl_easy_init();
-
-	if (conn == NULL) {
-		fprintf(stderr, "Failed to create CURL connection\n");
-		exit(EXIT_FAILURE);
-	}
-
-	code = curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, errorBuffer);
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to set error buffer [%d]\n", code);
-		//return false;
-	}
-
-	code = curl_easy_setopt(conn, CURLOPT_URL, url.c_str());
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
-		//return false;
-	}
-
-	code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);
-		//return false;
-	}
-
-	code = curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, writer);
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
-		//return false;
-	}
-
-	code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &buffer);
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
-		//return false;
-	}
-
-	// Retrieve content for the URL
-
-	code = curl_easy_perform(conn);
-	curl_easy_cleanup(conn);
-
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to get '%s' [%s]\n", url.c_str(), errorBuffer);
-		exit(EXIT_FAILURE);
-	}
-
-	curl_global_cleanup();
-
-	return Response(buffer);
-}
-std::string Requests::header(std::string url) {
-	CURL *curl = curl_easy_init();
-	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-		curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
-		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-		std::string filename = "";
-		curl_easy_setopt(curl, CURLOPT_HEADERDATA, &filename);
-
-		curl_easy_perform(curl);
-		std::cout << "FILENAME: " << filename << std::endl;
-		return filename;
-	}
-}
 
 RomsetCatalogueNointro::RomsetCatalogueNointro(std::string url) :
 		m_url(url) {
@@ -245,7 +140,14 @@ void RomsetCatalogueNointro::update() {
 
 			m_romsets.add(name);
 			m_romsets.back().set_version(version);
+			m_romsets.back().set_url(attr->value);
 		}
 	}
 
+}
+
+
+void RomsetCatalogueNointro::download(Romset* romset, std::string path){
+	std::cout << "download [" << romset->url() << "] to " << path << std::endl;
+	Requests::download(romset->url(), path);
 }

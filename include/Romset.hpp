@@ -15,6 +15,7 @@
 #include <list>
 #include <functional>
 
+
 class Rom {
 private:
 	friend std::ostream& operator<<(std::ostream &strm, const Rom &rom);
@@ -46,6 +47,7 @@ private:
 	std::string m_name, m_version;
 	std::string m_filename;
 	std::string m_directory;
+	std::string m_url;
 	std::unordered_map<std::string, Rom> m_roms;
 
 public:
@@ -56,6 +58,8 @@ public:
 	const std::string name();
 	const std::string version();
 	void set_version(std::string version);
+	const std::string url();
+	void set_url(std::string url);
 	std::unordered_map<std::string, Rom> roms();
 	bool contains(Rom *rom);
 	void import(std::string filepath, Rom *rom);
