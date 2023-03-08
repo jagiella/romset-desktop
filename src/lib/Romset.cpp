@@ -4,14 +4,14 @@
 #include <filesystem>
 #include <tinyxml2.h>
 
-Rom::Rom(const char *name, const char *filename, int size, const char *crc,
-		const char *md5) :
-		m_name(name), m_filename(filename), m_size(size), m_crc(crc), m_md5(md5) {
+Rom::Rom(std::shared_ptr<Game> game, const char *filename, int size,
+		const char *crc, const char *md5) :
+		m_game(game), m_filename(filename), m_size(size), m_crc(crc), m_md5(md5) {
 
 }
 
 std::ostream& operator<<(std::ostream &stream, const Rom &rom) {
-	return stream << "Rom(" << rom.name() << ", size=" << rom.size() << ")";
+	return stream << "Rom(" << rom.filename() << ", size=" << rom.size() << ")";
 }
 
 Romset::Romset(std::string name) :
@@ -39,29 +39,32 @@ Romset::Romset(std::string filename, std::string directory) :
 	m_version = version;
 
 	// games
-	auto game = doc.FirstChildElement("datafile")->FirstChildElement("game");
-	while (game != 0) {
+	auto e_datfile = doc.FirstChildElement("datafile");
+	for (auto e_game = e_datfile->FirstChildElement("game"); e_game != 0; e_game =
+			e_game->NextSiblingElement("game")) {
 		// game
-		const char *name = game->Attribute("name");
+		const char *name = e_game->Attribute("name");
 
-		// rom file
-		auto e_rom = game->FirstChildElement("rom");
-		const char *filename = e_rom->Attribute("name");
-		//int size = atoi(e_rom->Attribute("size"));
-		const char *size = e_rom->Attribute("size");
-		const char *crc = e_rom->Attribute("crc");
-		const char *md5 = e_rom->Attribute("md5");
+		std::shared_ptr<Game> p_game = std::make_shared<Game>(name);
 
-		if (size and crc and md5) {
-			//std::cout << "-> add: " << filename << std::endl;
-			m_roms.insert(std::make_pair<std::string, Rom>(md5, { name,
-					filename, atoi(size), crc, md5 }));
-		}else{
-			std::cout << "-> skip: " << filename << std::endl;
+		for (auto e_rom = e_game->FirstChildElement("rom"); e_rom != 0; e_rom =
+				e_rom->NextSiblingElement("rom")) {
+
+			// rom file
+			const char *filename = e_rom->Attribute("name");
+			const char *size = e_rom->Attribute("size");
+			const char *crc = e_rom->Attribute("crc");
+			const char *md5 = e_rom->Attribute("md5");
+			if (size and crc and md5) {
+				//std::cout << "-> add: " << filename << std::endl;
+				m_roms.insert(std::make_pair<std::string, Rom>(md5, { p_game,
+						filename, atoi(size), crc, md5 }));
+			} else {
+				std::cout << "-> skip: " << filename << std::endl;
+			}
 		}
-		game = game->NextSiblingElement("game");
 	}
-	std::cout << "-> added: " << m_roms.size() << " roms" << std::endl;
+	std::cout << "-> added: " << m_roms.size() << " games" << std::endl;
 }
 
 Romset::~Romset() {
@@ -111,13 +114,13 @@ void Romset::import(std::string filepath, Rom *other) {
 	}
 }
 
-void RomsetCollection::scan(std::filesystem::path path){
+void RomsetCollection::scan(std::filesystem::path path) {
 	for (auto file : std::filesystem::directory_iterator(path)) {
 		std::cout << "analyze: " << file << std::endl;
 		RomFile rom(file.path().c_str());
 
-		for(auto set : m_romsets){
-			if(set->contains(&rom)){
+		for (auto set : m_romsets) {
+			if (set->contains(&rom)) {
 				std::cout << "found!" << std::endl;
 			}
 		}

@@ -17,14 +17,36 @@
 #include <memory>
 #include <filesystem>
 
+class Game {
+//private:
+//	friend std::ostream& operator<<(std::ostream &strm, const Rom &rom);
+protected:
+	std::string m_name;
+//	std::list<std::shared_ptr<Rom>> m_roms;
+public:
+	Game(const char *name = "unnamed") :
+			m_name(name) {
+	}
+
+/*	void add_rom( std::shared_ptr<Rom> rom){
+		m_roms.emplace_back(rom);
+	}
+*/
+	virtual std::string name() const {
+		return m_name;
+	}
+};
+
+
 class Rom {
 private:
 	friend std::ostream& operator<<(std::ostream &strm, const Rom &rom);
 protected:
-	std::string m_name, m_filename, m_crc, m_md5;
+	std::string m_filename, m_crc, m_md5;
 	int m_size;
+	std::shared_ptr<Game> m_game;
 public:
-	Rom(const char *name = "unnamed", const char *filename = 0, int size = 0,
+	Rom(std::shared_ptr<Game> game, const char *filename = 0, int size = 0,
 			const char *crc = 0, const char *md5 = 0);
 	virtual std::string md5() {
 		return m_md5;
@@ -32,34 +54,15 @@ public:
 	virtual int size() const {
 		return m_size;
 	}
-	virtual std::string name() const {
+	/*virtual std::string name() const {
 		return m_name;
-	}
+	}*/
 	virtual std::string filename() const {
 		return m_filename;
 	}
 
 };
 
-class Game {
-//private:
-//	friend std::ostream& operator<<(std::ostream &strm, const Rom &rom);
-protected:
-	std::string m_name;
-	std::list<std::shared_ptr<Rom>> m_roms;
-public:
-	Game(const char *name = "unnamed") :
-			m_name(name) {
-	}
-
-	void add_rom( std::shared_ptr<Rom> rom){
-		m_roms.emplace_back(rom);
-	}
-
-	virtual std::string name() const {
-		return m_name;
-	}
-};
 
 //std::ostream& operator<<(std::ostream &strm, const Rom &rom)
 

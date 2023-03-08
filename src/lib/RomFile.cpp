@@ -7,7 +7,7 @@
 #include <openssl/evp.h>
 
 RomFile::RomFile(const char *path) :
-		Rom("unnamed", "", 0, "", ""), m_path(path) {
+		Rom(std::shared_ptr<Game>(), "", 0, "", ""), m_path(path) {
 
 }
 

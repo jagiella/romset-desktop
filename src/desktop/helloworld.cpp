@@ -201,12 +201,12 @@ void HelloWorld::on_folder_dialog_response(int response_id,
 					romset->import(romfile.path(), &romfile);
 					auto row_child = *m_refTreeStore->append(
 							m_Row_matched.children());
-					row_child[m_Columns.m_col_text] = romfile.name();
+					row_child[m_Columns.m_col_text] = romfile.filename();
 					count++;
 				} else {
 					auto row_child = *m_refTreeStore->append(
 							m_Row_unmatched.children());
-					row_child[m_Columns.m_col_text] = romfile.name();
+					row_child[m_Columns.m_col_text] = romfile.filename();
 					//m_Row_unmatched.
 				}
 			}
