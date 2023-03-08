@@ -9,6 +9,8 @@
 #include <ostream>
 #include <filesystem>
 #include <stdlib.h>
+#include <tclap/CmdLine.h>
+
 
 #include "Catalogue.hpp"
 #include "Requests.hpp"
@@ -24,6 +26,14 @@ typedef struct {
 
 int main(int argc, char **argv) {
 	std::cout << GREEN << "hello world" << CHECK << END << std::endl;
+
+	TCLAP::CmdLine cmd("Command description message", ' ', "0.9");
+	TCLAP::UnlabeledValueArg<std::string>  scan_directoryArg( "name", "scan directory", false, "/media/nick/7C3E14583E140E30/Games/Consoles/ps1/Theme Hospital (Europe) (En,Fr,De,Es,It,Sv)",
+            "path"  );
+	cmd.add(scan_directoryArg);
+	cmd.parse( argc, argv );
+	std::filesystem::path scan_directory = scan_directoryArg.getValue();
+	std::cout << "scan_directory: " << scan_directory << std::endl;
 
 	RomsetCatalogueNointro catalogue;
 	RomsetCollection collection;
@@ -144,9 +154,8 @@ int main(int argc, char **argv) {
 			break;
 
 		case '5': {
-			std::filesystem::path path = "/media/nick/7C3E14583E140E30/Games/Consoles/ps1/Theme Hospital (Europe) (En,Fr,De,Es,It,Sv)";
-			std::cout << "scan: " << path << std::endl;
-			collection.scan(path);
+			std::cout << "scan: " << scan_directory << std::endl;
+			collection.scan(scan_directory);
 		}
 			break;
 
