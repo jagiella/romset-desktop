@@ -6,7 +6,7 @@ pkg_check_modules(GUMBO REQUIRED gumbo)
 pkg_check_modules(CURL REQUIRED libcurl)
 pkg_check_modules(ZIP REQUIRED libzip)
 
-add_library(libromset SHARED
+add_library(romset SHARED
 	Romset.cpp
 	RomFile.cpp
 	Requests.cpp
@@ -14,5 +14,5 @@ add_library(libromset SHARED
 	#XML.cpp
 	)
 
-target_include_directories(libromset PRIVATE ${CMAKE_SOURCE_DIR}/include ${OPENSSL_INCLUDE_DIRS} ${LIBXMLXX_INCLUDE_DIRS} )
-target_link_libraries(libromset PRIVATE ${OPENSSL_LIBRARIES} ${TINYXML2_LIBRARIES} ${LIBXMLXX_LIBRARIES} ${GUMBO_LIBRARIES}  ${CURL_LIBRARIES} ${ZIP_LIBRARIES})
+target_include_directories(romset PRIVATE ${CMAKE_SOURCE_DIR}/include ${OPENSSL_INCLUDE_DIRS} ${LIBXMLXX_INCLUDE_DIRS} )
+target_link_libraries(romset PRIVATE ${OPENSSL_LIBRARIES} ${TINYXML2_LIBRARIES} ${LIBXMLXX_LIBRARIES} ${GUMBO_LIBRARIES}  ${CURL_LIBRARIES} ${ZIP_LIBRARIES})

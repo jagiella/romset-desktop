@@ -5,4 +5,4 @@ add_executable(romset-cli
 	)
 	
 target_include_directories(romset-cli PRIVATE ${CMAKE_SOURCE_DIR}/include )
-target_link_libraries(romset-cli PRIVATE libromset )
+target_link_libraries(romset-cli PRIVATE romset )

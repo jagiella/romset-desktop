@@ -10,4 +10,4 @@ add_executable(romset-desktop
 	)
 	
 target_include_directories(romset-desktop PRIVATE ${CMAKE_SOURCE_DIR}/include ${GTK_INCLUDE_DIRS})
-target_link_libraries(romset-desktop PRIVATE ${GTK_LIBRARIES} ${JSONCPP_LIBRARIES} libromset )
+target_link_libraries(romset-desktop PRIVATE ${GTK_LIBRARIES} ${JSONCPP_LIBRARIES} romset )

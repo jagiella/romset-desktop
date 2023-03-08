@@ -15,7 +15,7 @@
 #include <list>
 #include <functional>
 #include <memory>
-
+#include <filesystem>
 
 class Rom {
 private:
@@ -41,6 +41,26 @@ public:
 
 };
 
+class Game {
+//private:
+//	friend std::ostream& operator<<(std::ostream &strm, const Rom &rom);
+protected:
+	std::string m_name;
+	std::list<std::shared_ptr<Rom>> m_roms;
+public:
+	Game(const char *name = "unnamed") :
+			m_name(name) {
+	}
+
+	void add_rom( std::shared_ptr<Rom> rom){
+		m_roms.emplace_back(rom);
+	}
+
+	virtual std::string name() const {
+		return m_name;
+	}
+};
+
 //std::ostream& operator<<(std::ostream &strm, const Rom &rom)
 
 class Romset {
@@ -64,24 +84,28 @@ public:
 	std::unordered_map<std::string, Rom> roms();
 	bool contains(Rom *rom);
 	void import(std::string filepath, Rom *rom);
-	std::string filename(){return m_filename;}
-	std::string directory(){return m_directory;}
+	std::string filename() {
+		return m_filename;
+	}
+	std::string directory() {
+		return m_directory;
+	}
 };
 
-template<class... Types>
+template<class ... Types>
 class Signal {
 private:
 	std::list<std::function<void(Types ...)>> m_callbacks;
 public:
-	void connect(std::function<void(Types ...)> callback){
+	void connect(std::function<void(Types ...)> callback) {
 		m_callbacks.push_back(callback);
 	}
 	/*void connect(void(Types ...) *callback){
-		//m_callbacks.push_back(callback);
-	}*/
-	void emit(Types... args){
-		for(auto callback: m_callbacks){
-			callback(args... );
+	 //m_callbacks.push_back(callback);
+	 }*/
+	void emit(Types ... args) {
+		for (auto callback : m_callbacks) {
+			callback(args...);
 		}
 	}
 };
@@ -92,39 +116,43 @@ private:
 public:
 	Signal<std::shared_ptr<Romset>> added;
 	Signal<std::shared_ptr<Romset>> removed;
-	void add(std::string name){
-		m_romsets.push_back(std::make_shared<Romset>(name));
+	void add(std::string name) {
+		m_romsets.push_back(std::make_shared < Romset > (name));
 		//m_romsets.emplace_back(name);
 		added.emit(m_romsets.back());
 	}
-	void add(std::string filename, std::string directory){
-		m_romsets.push_back(std::make_shared<Romset>(filename, directory));
+	void add(std::string filename, std::string directory) {
+		m_romsets.push_back(std::make_shared < Romset > (filename, directory));
 		//m_romsets.emplace_back(filename, directory);
 		added.emit(m_romsets.back());
 	}
-	void remove(std::shared_ptr<Romset> rs){
+	void remove(std::shared_ptr<Romset> rs) {
 		m_romsets.remove(rs);
 	}
-	std::list<std::shared_ptr<Romset>>::iterator erase(std::list<std::shared_ptr<Romset>>::iterator rs){
+	std::list<std::shared_ptr<Romset>>::iterator erase(
+			std::list<std::shared_ptr<Romset>>::iterator rs) {
 		return m_romsets.erase(rs);
 	}
-	std::shared_ptr<Romset> find(std::string name){
-		for(auto romset : m_romsets){
-			if(romset->name() == name)
+	std::shared_ptr<Romset> find(std::string name) {
+		for (auto romset : m_romsets) {
+			if (romset->name() == name)
 				return romset;
 		}
 		return 0;
 	}
-	auto end(){
+
+	void scan(std::filesystem::path path);
+
+	auto end() {
 		return m_romsets.end();
 	}
-	auto begin(){
+	auto begin() {
 		return m_romsets.begin();
 	}
-	auto cbegin(){
+	auto cbegin() {
 		return m_romsets.cbegin();
 	}
-	auto& back(){
+	auto& back() {
 		return m_romsets.back();
 	}
 };

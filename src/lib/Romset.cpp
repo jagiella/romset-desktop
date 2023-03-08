@@ -1,4 +1,5 @@
 #include "Romset.hpp"
+#include "RomFile.hpp"
 #include <iostream>
 #include <filesystem>
 #include <tinyxml2.h>
@@ -107,5 +108,18 @@ void Romset::import(std::string filepath, Rom *other) {
 		std::filesystem::create_directories(m_directory);
 		std::filesystem::rename(filepath,
 				m_directory + match->second.filename());
+	}
+}
+
+void RomsetCollection::scan(std::filesystem::path path){
+	for (auto file : std::filesystem::directory_iterator(path)) {
+		std::cout << "analyze: " << file << std::endl;
+		RomFile rom(file.path().c_str());
+
+		for(auto set : m_romsets){
+			if(set->contains(&rom)){
+				std::cout << "found!" << std::endl;
+			}
+		}
 	}
 }

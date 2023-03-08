@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
 	}
 
 	MenuItem menu[] = { { '1', "list" }, { '2', "update" }, { '3',
-			"download (updatable)" }, { '4', "download (missing)" }, { 'q',
-			"exit" }, };
+			"download (updatable)" }, { '4', "download (missing)" }, { '5',
+			"scan" }, { 'q', "exit" }, };
 
 	bool _exit = false;
 	while (not _exit) {
@@ -140,6 +140,13 @@ int main(int argc, char **argv) {
 			for (auto filename : new_files) {
 				collection.add(filename, "");
 			}
+		}
+			break;
+
+		case '5': {
+			std::filesystem::path path = "/media/nick/7C3E14583E140E30/Games/Consoles/ps1/Theme Hospital (Europe) (En,Fr,De,Es,It,Sv)";
+			std::cout << "scan: " << path << std::endl;
+			collection.scan(path);
 		}
 			break;
 
