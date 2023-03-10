@@ -1,4 +1,5 @@
-#include "helloworld.hpp"
+#include "MainWindow.hpp"
+
 #include "RomFile.hpp"
 #include <iostream>
 #include <fstream>
@@ -6,18 +7,18 @@
 #include <gtkmm.h>
 #include <jsoncpp/json/json.h>
 
-HelloWorld::HelloWorld() :
+MainWindow::MainWindow() :
 		m_button("Load Dat file"), // creates a new button with label "Hello World".
 		m_folder_button("Scan directory"),
 		m_sidebar(&m_romsets),
 		m_headerbar() {
 
-	std::cout << "HelloWorld()" << std::endl;
+	std::cout << "MainWindow()" << std::endl;
 	set_size_request(500, 500);
 	m_button.signal_clicked().connect(
-			sigc::mem_fun(*this, &HelloWorld::on_button_clicked));
+			sigc::mem_fun(*this, &MainWindow::on_button_clicked));
 	m_folder_button.signal_clicked().connect(
-			sigc::mem_fun(*this, &HelloWorld::on_folder_button_clicked));
+			sigc::mem_fun(*this, &MainWindow::on_folder_button_clicked));
 
 	// create model
 	m_refTreeStore = Gtk::TreeStore::create(m_Columns);
@@ -79,7 +80,7 @@ HelloWorld::HelloWorld() :
 	this->set_titlebar(m_headerbar);
 }
 
-void HelloWorld::creatTitlebar() {
+void MainWindow::creatTitlebar() {
 	Gtk::Button btn;
 	btn.set_image_from_icon_name("list-add");
 	Gtk::Button btn2;
@@ -89,7 +90,7 @@ void HelloWorld::creatTitlebar() {
 	set_titlebar(m_headerbar);
 }
 
-HelloWorld::~HelloWorld() {
+MainWindow::~MainWindow() {
 	Json::Value root;
 
 	for (auto romset : m_romsets) {
@@ -106,7 +107,7 @@ HelloWorld::~HelloWorld() {
 	myfile.close();
 }
 
-void HelloWorld::on_button_clicked() {
+void MainWindow::on_button_clicked() {
 	std::cout << "Hello World" << std::endl;
 
 	auto dialog = new Gtk::FileChooserDialog("Please choose a file",
@@ -115,7 +116,7 @@ void HelloWorld::on_button_clicked() {
 	dialog->set_modal(true);
 	dialog->signal_response().connect(
 			sigc::bind(
-					sigc::mem_fun(*this, &HelloWorld::on_file_dialog_response),
+					sigc::mem_fun(*this, &MainWindow::on_file_dialog_response),
 					dialog));
 
 	//Add response buttons to the dialog:
@@ -132,7 +133,7 @@ void HelloWorld::on_button_clicked() {
 	std::cout << "show finished." << std::endl;
 }
 
-void HelloWorld::on_folder_button_clicked() {
+void MainWindow::on_folder_button_clicked() {
 	auto dialog = new Gtk::FileChooserDialog("Please choose a folder",
 			Gtk::FileChooser::Action::SELECT_FOLDER);
 	dialog->set_transient_for(*this);
@@ -140,7 +141,7 @@ void HelloWorld::on_folder_button_clicked() {
 	dialog->signal_response().connect(
 			sigc::bind(
 					sigc::mem_fun(*this,
-							&HelloWorld::on_folder_dialog_response), dialog));
+							&MainWindow::on_folder_dialog_response), dialog));
 
 	//Add response buttons to the dialog:
 	dialog->add_button("_Cancel", Gtk::ResponseType::CANCEL);
@@ -150,7 +151,7 @@ void HelloWorld::on_folder_button_clicked() {
 	dialog->show();
 }
 
-void HelloWorld::on_file_dialog_response(int response_id,
+void MainWindow::on_file_dialog_response(int response_id,
 		Gtk::FileChooserDialog *dialog) {
 	//Handle the response:
 	switch (response_id) {
@@ -177,7 +178,7 @@ void HelloWorld::on_file_dialog_response(int response_id,
 	std::cout << "dialog finished." << std::endl;
 }
 
-void HelloWorld::on_folder_dialog_response(int response_id,
+void MainWindow::on_folder_dialog_response(int response_id,
 		Gtk::FileChooserDialog *dialog) {
 	//Handle the response:
 	switch (response_id) {

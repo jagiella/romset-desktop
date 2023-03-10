@@ -29,7 +29,7 @@ public:
 	Gtk::TreeModelColumn<Glib::ustring> m_col_text;
 };
 
-class HelloWorld: public Gtk::Window {
+class MainWindow: public Gtk::Window {
 
 private:
 	RomsetCollection m_romsets;
@@ -37,8 +37,8 @@ private:
 
 	void creatTitlebar();
 public:
-	HelloWorld();
-	virtual ~HelloWorld();
+	MainWindow();
+	virtual ~MainWindow();
 
 protected:
 	//Signal handlers:

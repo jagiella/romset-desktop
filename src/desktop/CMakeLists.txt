@@ -4,7 +4,7 @@ pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
 add_executable(romset-desktop 
 	main.cpp 
-	helloworld.cpp
+	MainWindow.cpp
 	Sidebar.cpp
 	Headerbar.cpp
 	)
