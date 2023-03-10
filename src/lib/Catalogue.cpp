@@ -13,9 +13,9 @@
 #include <fstream>
 
 #include <tinyxml2.h>
-#include <libxml++/libxml++.h>
-#include <libxml/tree.h>
-#include <libxml/HTMLparser.h>
+//#include <libxml++/libxml++.h>
+//#include <libxml/tree.h>
+//#include <libxml/HTMLparser.h>
 #include <gumbo.h>
 #include <zip.h>
 

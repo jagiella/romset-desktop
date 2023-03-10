@@ -7,3 +7,4 @@ add_executable(romset-cli
 	
 target_include_directories(romset-cli PRIVATE ${CMAKE_SOURCE_DIR}/include  ${TCLAP_INCLUDE_DIRS})
 target_link_libraries(romset-cli PRIVATE romset )
+set_property(TARGET romset-cli PROPERTY CXX_STANDARD 20)

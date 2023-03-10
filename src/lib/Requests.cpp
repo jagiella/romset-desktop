@@ -118,6 +118,7 @@ std::string Requests::header(std::string url) {
 		std::cout << "FILENAME: " << filename << std::endl;
 		return filename;
 	}
+	return "";
 }
 
 size_t write_data(const char *ptr, size_t size, size_t nmemb,
