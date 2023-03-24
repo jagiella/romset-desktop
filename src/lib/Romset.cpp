@@ -114,14 +114,15 @@ void Romset::import(std::string filepath, Rom *other) {
 	}
 }
 
-void RomsetCollection::scan(std::filesystem::path path) {
+void RomsetCollection::scan(std::filesystem::path path, std::function<void(std::filesystem::path, std::shared_ptr<Romset>)> callback) {
 	for (auto file : std::filesystem::directory_iterator(path)) {
 		std::cout << "analyze: " << file << std::endl;
 		RomFile rom(file.path().c_str());
 
 		for (auto set : m_romsets) {
 			if (set->contains(&rom)) {
-				std::cout << "found!" << std::endl;
+				//std::cout << "found!" << std::endl;
+				callback(file.path(), set);
 			}
 		}
 	}

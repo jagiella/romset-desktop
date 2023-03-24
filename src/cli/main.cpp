@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <tclap/CmdLine.h>
 
-
 #include "Catalogue.hpp"
 #include "Requests.hpp"
 
@@ -24,16 +23,65 @@ typedef struct {
 #define END   "\x1b[0m"
 #define CHECK "\u2713"
 
+void move_rom(std::filesystem::path p, std::filesystem::path destdir) {
+	//std::cout << "found " << p << " in " << romset->name() << std::endl;
+
+	std::cout << "create path: " << destdir << std::endl;
+	std::filesystem::create_directories(destdir);
+
+	std::cout << "move rom: " << p << std::endl;
+	std::error_code ec;
+	std::filesystem::rename(p, destdir, ec);
+	if (ec.value() == 18) {
+		/*std::cout << "code().value():    " << ec.value() << '\n'
+		 << "code().message():  " << ec.message() << '\n'
+		 << "code().category(): " << ec.category().name() << '\n';*/
+		const auto modify_time = std::filesystem::last_write_time(p);
+		std::cout << "copy rom: " << p << std::endl;
+		try {
+			std::filesystem::copy(p, destdir,
+					std::filesystem::copy_options::update_existing);
+		} catch (std::filesystem::filesystem_error const &ex) {
+			std::cerr << "error while copying: " << ex.what() << std::endl;
+			return;
+		}
+
+		try {
+			std::filesystem::path p_new_location = destdir / p.filename();
+			std::filesystem::last_write_time(p_new_location, modify_time);
+		} catch(std::filesystem::filesystem_error const& ex) {
+			std::cerr << "error while setting write time: " << ex.what() << std::endl;
+			return;
+		}
+
+		std::cout << "remove rom: " << p << std::endl;
+		try {
+			std::filesystem::remove(p);
+		} catch (std::filesystem::filesystem_error const &ex) {
+			std::cerr << "error while removing: " << ex.what() << std::endl;
+			return;
+		}
+	}
+}
+
 int main(int argc, char **argv) {
 	std::cout << GREEN << "hello world" << CHECK << END << std::endl;
 
 	TCLAP::CmdLine cmd("Command description message", ' ', "0.9");
-	TCLAP::UnlabeledValueArg<std::string>  scan_directoryArg( "name", "scan directory", false, "/media/nick/7C3E14583E140E30/Games/Consoles/ps1/Theme Hospital (Europe) (En,Fr,De,Es,It,Sv)",
-            "path"  );
+	TCLAP::UnlabeledValueArg<std::string> scan_directoryArg("scandir",
+			"scan directory", true,
+			"/media/nick/7C3E14583E140E30/Games/Consoles/ps1/Theme Hospital (Europe) (En,Fr,De,Es,It,Sv)",
+			"SCAN_PATH");
+	TCLAP::UnlabeledValueArg<std::string> target_directoryArg("targetdir",
+			"target directory", false, "", "TARGET_PATH");
 	cmd.add(scan_directoryArg);
-	cmd.parse( argc, argv );
+	cmd.add(target_directoryArg);
+	cmd.parse(argc, argv);
+
 	std::filesystem::path scan_directory = scan_directoryArg.getValue();
 	std::cout << "scan_directory: " << scan_directory << std::endl;
+	std::filesystem::path target_directory = target_directoryArg.getValue();
+	std::cout << "target_directory: " << target_directory << std::endl;
 
 	RomsetCatalogueNointro catalogue;
 	RomsetCollection collection;
@@ -155,7 +203,14 @@ int main(int argc, char **argv) {
 
 		case '5': {
 			std::cout << "scan: " << scan_directory << std::endl;
-			collection.scan(scan_directory);
+			collection.scan(scan_directory,
+					[target_directory](std::filesystem::path p,
+							std::shared_ptr<Romset> romset) {
+						std::cout << "found " << p << " in " << romset->name()
+								<< std::endl;
+						move_rom(p, target_directory / romset->name());
+
+					});
 		}
 			break;
 

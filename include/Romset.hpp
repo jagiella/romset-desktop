@@ -16,6 +16,7 @@
 #include <functional>
 #include <memory>
 #include <filesystem>
+#include <functional>
 
 class Game {
 //private:
@@ -144,7 +145,7 @@ public:
 		return 0;
 	}
 
-	void scan(std::filesystem::path path);
+	void scan(std::filesystem::path path, std::function<void(std::filesystem::path, std::shared_ptr<Romset>)> callback);
 
 	auto end() {
 		return m_romsets.end();
