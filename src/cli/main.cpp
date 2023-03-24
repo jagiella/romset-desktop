@@ -49,8 +49,9 @@ void move_rom(std::filesystem::path p, std::filesystem::path destdir) {
 		try {
 			std::filesystem::path p_new_location = destdir / p.filename();
 			std::filesystem::last_write_time(p_new_location, modify_time);
-		} catch(std::filesystem::filesystem_error const& ex) {
-			std::cerr << "error while setting write time: " << ex.what() << std::endl;
+		} catch (std::filesystem::filesystem_error const &ex) {
+			std::cerr << "error while setting write time: " << ex.what()
+					<< std::endl;
 			return;
 		}
 
@@ -208,7 +209,8 @@ int main(int argc, char **argv) {
 							std::shared_ptr<Romset> romset) {
 						std::cout << "found " << p << " in " << romset->name()
 								<< std::endl;
-						move_rom(p, target_directory / romset->name());
+						if (target_directory != "")
+							move_rom(p, target_directory / romset->name());
 
 					});
 		}
