@@ -62,6 +62,10 @@ void move_rom(std::filesystem::path p, std::filesystem::path destdir) {
 			std::cerr << "error while removing: " << ex.what() << std::endl;
 			return;
 		}
+	} else if( ec.value() ){
+		std::cout << "code().value():    " << ec.value() << '\n'
+				 << "code().message():  " << ec.message() << '\n'
+				 << "code().category(): " << ec.category().name() << '\n';
 	}
 }
 
