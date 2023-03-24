@@ -87,6 +87,7 @@ public:
 	void set_url(std::string url);
 	std::unordered_map<std::string, Rom> roms();
 	bool contains(Rom *rom);
+	Rom find(Rom *other);
 	void import(std::string filepath, Rom *rom);
 	std::string filename() {
 		return m_filename;
@@ -145,7 +146,7 @@ public:
 		return 0;
 	}
 
-	void scan(std::filesystem::path path, std::function<void(std::filesystem::path, std::shared_ptr<Romset>)> callback);
+	void scan(std::filesystem::path path, std::function<void(std::filesystem::path, std::shared_ptr<Romset>, Rom)> callback);
 
 	auto end() {
 		return m_romsets.end();
