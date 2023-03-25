@@ -40,8 +40,8 @@ Romset::Romset(std::string filename, std::string directory) :
 
 	// games
 	auto e_datfile = doc.FirstChildElement("datafile");
-	for (auto e_game = e_datfile->FirstChildElement("game"); e_game != 0; e_game =
-			e_game->NextSiblingElement("game")) {
+	for (auto e_game = e_datfile->FirstChildElement("game"); e_game != 0;
+			e_game = e_game->NextSiblingElement("game")) {
 		// game
 		const char *name = e_game->Attribute("name");
 
@@ -118,17 +118,20 @@ void Romset::import(std::string filepath, Rom *other) {
 	}
 }
 
-void RomsetCollection::scan(std::filesystem::path path, std::function<void(std::filesystem::path, std::shared_ptr<Romset>, Rom)> callback) {
+void RomsetCollection::scan(std::filesystem::path path,
+		std::function<void(std::filesystem::path, std::shared_ptr<Romset>, Rom)> callback) {
 	for (auto file : std::filesystem::directory_iterator(path)) {
-		std::cout << "analyze: " << file << std::endl;
-		RomFile romfile(file.path().c_str());
+		if (!std::filesystem::is_directory(file)) {
+			std::cout << "analyze: " << file << std::endl;
+			RomFile romfile(file.path().c_str());
 
-		for (auto set : m_romsets) {
-			if (set->contains(&romfile)) {
-				//std::cout << "found!" << std::endl;
-				//m_roms.find(other->md5())
-				Rom rom = set->find(&romfile);
-				callback(file.path(), set, rom);
+			for (auto set : m_romsets) {
+				if (set->contains(&romfile)) {
+					//std::cout << "found!" << std::endl;
+					//m_roms.find(other->md5())
+					Rom rom = set->find(&romfile);
+					callback(file.path(), set, rom);
+				}
 			}
 		}
 	}
