@@ -25,7 +25,7 @@ typedef struct {
 
 void copy_rom(std::filesystem::path src, std::filesystem::path dst) {
 	const auto modify_time = std::filesystem::last_write_time(src);
-	std::cout << "copy rom: " << src << std::endl;
+	std::cout << GREEN << "copy rom: " << END << dst << std::endl;
 	try {
 		std::filesystem::copy(src, dst,
 				std::filesystem::copy_options::update_existing);
@@ -56,10 +56,13 @@ void remove_rom(std::filesystem::path src) {
 void move_rom(std::filesystem::path src, std::filesystem::path dst) {
 	//std::cout << "found " << p << " in " << romset->name() << std::endl;
 
-	std::cout << "create path: " << dst.parent_path() << std::endl;
-	std::filesystem::create_directories(dst.parent_path());
+	if (!std::filesystem::exists(dst.parent_path())) {
+		std::cout << GREEN << "create path: " << END << dst.parent_path()
+				<< std::endl;
+		std::filesystem::create_directories(dst.parent_path());
+	}
 
-	std::cout << "move rom: " << src << std::endl;
+	std::cout << GREEN << "move rom: " << END << dst << std::endl;
 	std::error_code ec;
 	std::filesystem::rename(src, dst, ec);
 	if (ec.value() == 18) {
@@ -215,10 +218,15 @@ int main(int argc, char **argv) {
 					[target_directory](std::filesystem::path p,
 							std::list<Match> matches) {
 						if (matches.size() == 1) {
-							move_rom(p, target_directory / matches.back().first->name() / matches.back().second.filename());
-						}else{
-							for(auto match : matches){
-								copy_rom(p, target_directory / match.first->name() / match.second.filename());
+							move_rom(p,
+									target_directory
+											/ matches.back().first->name()
+											/ matches.back().second.filename());
+						} else {
+							for (auto match : matches) {
+								copy_rom(p,
+										target_directory / match.first->name()
+												/ match.second.filename());
 							}
 							remove_rom(p);
 						}
