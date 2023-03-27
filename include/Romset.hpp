@@ -73,7 +73,7 @@ private:
 	std::string m_filename;
 	std::string m_directory;
 	std::string m_url;
-	std::unordered_map<std::string, Rom> m_roms;
+	std::unordered_map<std::string, std::list<Rom>> m_roms;
 
 public:
 	Romset(std::string name);
@@ -85,9 +85,9 @@ public:
 	void set_version(std::string version);
 	const std::string url();
 	void set_url(std::string url);
-	std::unordered_map<std::string, Rom> roms();
+	std::unordered_map<std::string, std::list<Rom>> roms();
 	bool contains(Rom *rom);
-	Rom find(Rom *other);
+	std::list<Rom> find(Rom *other);
 	void import(std::string filepath, Rom *rom);
 	std::string filename() {
 		return m_filename;

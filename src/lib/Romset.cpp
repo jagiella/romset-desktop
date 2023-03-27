@@ -57,8 +57,9 @@ Romset::Romset(std::string filename, std::string directory) :
 			const char *md5 = e_rom->Attribute("md5");
 			if (size and crc and md5) {
 				//std::cout << "-> add: " << filename << std::endl;
-				m_roms.insert(std::make_pair<std::string, Rom>(md5, { p_game,
-						filename, atoi(size), crc, md5 }));
+				m_roms[md5].emplace_back(p_game, filename, atoi(size), crc, md5 );
+				//m_roms.insert(std::make_pair<std::string, Rom>(md5, { p_game,
+				//		filename, atoi(size), crc, md5 }));
 			} else {
 				std::cout << "-> skip: " << filename << std::endl;
 			}
@@ -97,7 +98,7 @@ void Romset::set_url(std::string url) {
 	//std::cout << "-> url: " << url << std::endl;
 }
 
-std::unordered_map<std::string, Rom> Romset::roms() {
+std::unordered_map<std::string, std::list<Rom>> Romset::roms() {
 	return m_roms;
 }
 
@@ -105,16 +106,17 @@ bool Romset::contains(Rom *other) {
 	return m_roms.find(other->md5()) != m_roms.end();
 }
 
-Rom Romset::find(Rom *other) {
+std::list<Rom> Romset::find(Rom *other) {
 	return m_roms.find(other->md5())->second;
 }
 
 void Romset::import(std::string filepath, Rom *other) {
-	auto match = m_roms.find(other->md5());
-	if (match != m_roms.end()) {
+	auto matches = m_roms.find(other->md5());
+	if (matches != m_roms.end()) {
 		std::filesystem::create_directories(m_directory);
-		std::filesystem::rename(filepath,
-				m_directory + match->second.filename());
+		for(auto match : matches->second)
+			std::filesystem::rename(filepath,
+				m_directory + match.filename());
 	}
 }
 
@@ -132,8 +134,9 @@ void RomsetCollection::scan(std::filesystem::path path,
 				if (set->contains(&romfile)) {
 					//std::cout << "found!" << std::endl;
 					//m_roms.find(other->md5())
-					Rom rom = set->find(&romfile);
-					matches.emplace_back(set, rom);
+					std::list<Rom> roms = set->find(&romfile);
+					for(auto rom : roms)
+						matches.emplace_back(set, rom);
 					//callback(file.path(), set, rom);
 				}
 			}
