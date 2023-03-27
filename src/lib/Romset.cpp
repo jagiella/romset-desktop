@@ -118,21 +118,28 @@ void Romset::import(std::string filepath, Rom *other) {
 	}
 }
 
+
 void RomsetCollection::scan(std::filesystem::path path,
-		std::function<void(std::filesystem::path, std::shared_ptr<Romset>, Rom)> callback) {
+		std::function<void(std::filesystem::path, std::list<Match>)> callback) {
 	for (auto file : std::filesystem::directory_iterator(path)) {
 		if (!std::filesystem::is_directory(file)) {
 			std::cout << "analyze: " << file << std::endl;
 			RomFile romfile(file.path().c_str());
+
+			std::list<Match> matches;
 
 			for (auto set : m_romsets) {
 				if (set->contains(&romfile)) {
 					//std::cout << "found!" << std::endl;
 					//m_roms.find(other->md5())
 					Rom rom = set->find(&romfile);
-					callback(file.path(), set, rom);
+					matches.emplace_back(set, rom);
+					//callback(file.path(), set, rom);
 				}
 			}
+
+			if(matches.size() > 0)
+				callback(file.path(), matches);
 		}
 	}
 }

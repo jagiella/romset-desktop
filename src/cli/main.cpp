@@ -23,6 +23,36 @@ typedef struct {
 #define END   "\x1b[0m"
 #define CHECK "\u2713"
 
+void copy_rom(std::filesystem::path src, std::filesystem::path dst) {
+	const auto modify_time = std::filesystem::last_write_time(src);
+	std::cout << "copy rom: " << src << std::endl;
+	try {
+		std::filesystem::copy(src, dst,
+				std::filesystem::copy_options::update_existing);
+	} catch (std::filesystem::filesystem_error const &ex) {
+		std::cerr << "error while copying: " << ex.what() << std::endl;
+		return;
+	}
+
+	try {
+		std::filesystem::last_write_time(dst, modify_time);
+	} catch (std::filesystem::filesystem_error const &ex) {
+		std::cerr << "error while setting write time: " << ex.what()
+				<< std::endl;
+		return;
+	}
+}
+
+void remove_rom(std::filesystem::path src) {
+	std::cout << "remove rom: " << src << std::endl;
+	try {
+		std::filesystem::remove(src);
+	} catch (std::filesystem::filesystem_error const &ex) {
+		std::cerr << "error while removing: " << ex.what() << std::endl;
+		return;
+	}
+}
+
 void move_rom(std::filesystem::path src, std::filesystem::path dst) {
 	//std::cout << "found " << p << " in " << romset->name() << std::endl;
 
@@ -33,38 +63,12 @@ void move_rom(std::filesystem::path src, std::filesystem::path dst) {
 	std::error_code ec;
 	std::filesystem::rename(src, dst, ec);
 	if (ec.value() == 18) {
-		/*std::cout << "code().value():    " << ec.value() << '\n'
-		 << "code().message():  " << ec.message() << '\n'
-		 << "code().category(): " << ec.category().name() << '\n';*/
-		const auto modify_time = std::filesystem::last_write_time(src);
-		std::cout << "copy rom: " << src << std::endl;
-		try {
-			std::filesystem::copy(src, dst,
-					std::filesystem::copy_options::update_existing);
-		} catch (std::filesystem::filesystem_error const &ex) {
-			std::cerr << "error while copying: " << ex.what() << std::endl;
-			return;
-		}
-
-		try {
-			std::filesystem::last_write_time(dst, modify_time);
-		} catch (std::filesystem::filesystem_error const &ex) {
-			std::cerr << "error while setting write time: " << ex.what()
-					<< std::endl;
-			return;
-		}
-
-		std::cout << "remove rom: " << src << std::endl;
-		try {
-			std::filesystem::remove(src);
-		} catch (std::filesystem::filesystem_error const &ex) {
-			std::cerr << "error while removing: " << ex.what() << std::endl;
-			return;
-		}
-	} else if( ec.value() ){
+		copy_rom(src, dst);
+		remove_rom(src);
+	} else if (ec.value()) {
 		std::cout << "code().value():    " << ec.value() << '\n'
-				 << "code().message():  " << ec.message() << '\n'
-				 << "code().category(): " << ec.category().name() << '\n';
+				<< "code().message():  " << ec.message() << '\n'
+				<< "code().category(): " << ec.category().name() << '\n';
 	}
 }
 
@@ -209,11 +213,19 @@ int main(int argc, char **argv) {
 			std::cout << "scan: " << scan_directory << std::endl;
 			collection.scan(scan_directory,
 					[target_directory](std::filesystem::path p,
-							std::shared_ptr<Romset> romset, Rom rom) {
-						std::cout << "found " << p << " in " << romset->name()
-								<< std::endl;
-						if (target_directory != "")
-							move_rom(p, target_directory / romset->name() / rom.filename());
+							std::list<Match> matches) {
+						if (matches.size() == 1) {
+							move_rom(p, target_directory / matches.back().first->name() / matches.back().second.filename());
+						}else{
+							for(auto match : matches){
+								copy_rom(p, target_directory / match.first->name() / match.second.filename());
+							}
+							remove_rom(p);
+						}
+						//std::cout << "found " << p << " in " << romset->name()
+						//<< std::endl;
+						//if (target_directory != "")
+						//move_rom(p, target_directory / romset->name() / rom.filename());
 
 					});
 		}

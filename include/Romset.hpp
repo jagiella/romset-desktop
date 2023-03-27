@@ -115,6 +115,8 @@ public:
 	}
 };
 
+typedef std::pair<std::shared_ptr<Romset>, Rom> Match;
+
 class RomsetCollection {
 private:
 	std::list<std::shared_ptr<Romset>> m_romsets;
@@ -146,7 +148,7 @@ public:
 		return 0;
 	}
 
-	void scan(std::filesystem::path path, std::function<void(std::filesystem::path, std::shared_ptr<Romset>, Rom)> callback);
+	void scan(std::filesystem::path path, std::function<void(std::filesystem::path, std::list<Match>)> callback);
 
 	auto end() {
 		return m_romsets.end();
