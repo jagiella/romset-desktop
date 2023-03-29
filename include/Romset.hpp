@@ -18,23 +18,29 @@
 #include <filesystem>
 #include <functional>
 
+class Rom;
+
 class Game {
 //private:
 //	friend std::ostream& operator<<(std::ostream &strm, const Rom &rom);
 protected:
 	std::string m_name;
-//	std::list<std::shared_ptr<Rom>> m_roms;
+	std::list<std::weak_ptr<Rom>> m_roms;
 public:
 	Game(const char *name = "unnamed") :
 			m_name(name) {
 	}
 
-/*	void add_rom( std::shared_ptr<Rom> rom){
+	void add_rom( std::weak_ptr<Rom> rom){
 		m_roms.emplace_back(rom);
 	}
-*/
+
 	virtual std::string name() const {
 		return m_name;
+	}
+
+	std::list<std::weak_ptr<Rom>> roms(){
+		return m_roms;
 	}
 };
 
@@ -62,6 +68,10 @@ public:
 		return m_filename;
 	}
 
+	virtual std::shared_ptr<Game> game(){
+		return m_game;
+	}
+
 };
 
 
@@ -73,7 +83,7 @@ private:
 	std::string m_filename;
 	std::string m_directory;
 	std::string m_url;
-	std::unordered_map<std::string, std::list<Rom>> m_roms;
+	std::unordered_map<std::string, std::list<std::shared_ptr<Rom>>> m_roms;
 
 public:
 	Romset(std::string name);
@@ -85,9 +95,9 @@ public:
 	void set_version(std::string version);
 	const std::string url();
 	void set_url(std::string url);
-	std::unordered_map<std::string, std::list<Rom>> roms();
+	std::unordered_map<std::string, std::list<std::shared_ptr<Rom>>> roms();
 	bool contains(Rom *rom);
-	std::list<Rom> find(Rom *other);
+	std::list<std::shared_ptr<Rom>> find(Rom *other);
 	void import(std::string filepath, Rom *rom);
 	std::string filename() {
 		return m_filename;
@@ -115,7 +125,7 @@ public:
 	}
 };
 
-typedef std::pair<std::shared_ptr<Romset>, Rom> Match;
+typedef std::pair<std::shared_ptr<Romset>, std::shared_ptr<Rom>> Match;
 
 class RomsetCollection {
 private:

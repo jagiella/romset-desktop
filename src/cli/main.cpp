@@ -215,26 +215,42 @@ int main(int argc, char **argv) {
 		case '5': {
 			std::cout << "scan: " << scan_directory << std::endl;
 			collection.scan(scan_directory,
-					[target_directory](std::filesystem::path p,
+					[target_directory](std::filesystem::path src_path,
 							std::list<Match> matches) {
-						if (matches.size() == 1) {
-							move_rom(p,
-									target_directory
-											/ matches.back().first->name()
-											/ matches.back().second.filename());
-						} else {
-							for (auto match : matches) {
-								copy_rom(p,
-										target_directory / match.first->name()
-												/ match.second.filename());
-							}
-							remove_rom(p);
+						//matches.back().second.
+
+						for (auto match : matches) {
+							std::filesystem::path dst_path;
+							auto romset = match.first;
+							auto rom = match.second;
+							auto game = rom->game();
+
+							if (game->roms().size() == 1)
+								dst_path = target_directory / romset->name()
+										/ rom->filename();
+							else if (game->roms().size() > 1)
+								dst_path = target_directory / romset->name()
+										/ game->name() / rom->filename();
+							copy_rom(src_path, dst_path);
 						}
+						remove_rom(src_path);
+						/*if (matches.size() == 1) {
+						 move_rom(p,
+						 target_directory
+						 / matches.back().first->name()
+						 / matches.back().second->filename());
+						 } else {
+						 for (auto match : matches) {
+						 copy_rom(p,
+						 target_directory / match.first->name()
+						 / match.second->filename());
+						 }
+						 remove_rom(p);
+						 }*/
 						//std::cout << "found " << p << " in " << romset->name()
 						//<< std::endl;
 						//if (target_directory != "")
 						//move_rom(p, target_directory / romset->name() / rom.filename());
-
 					});
 		}
 			break;
