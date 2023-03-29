@@ -35,11 +35,11 @@ public:
 		m_roms.emplace_back(rom);
 	}
 
-	virtual std::string name() const {
+	const std::string& name() const {
 		return m_name;
 	}
 
-	std::list<std::weak_ptr<Rom>> roms(){
+	const std::list<std::weak_ptr<Rom>>& roms(){
 		return m_roms;
 	}
 };
@@ -95,7 +95,7 @@ public:
 	void set_version(std::string version);
 	const std::string url();
 	void set_url(std::string url);
-	std::unordered_map<std::string, std::list<std::shared_ptr<Rom>>> roms();
+	const std::unordered_map<std::string, std::list<std::shared_ptr<Rom>>>& roms();
 	bool contains(Rom *rom);
 	std::list<std::shared_ptr<Rom>> find(Rom *other);
 	void import(std::string filepath, Rom *rom);

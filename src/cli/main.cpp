@@ -24,6 +24,12 @@ typedef struct {
 #define CHECK "\u2713"
 
 void copy_rom(std::filesystem::path src, std::filesystem::path dst) {
+	if (!std::filesystem::exists(dst.parent_path())) {
+		std::cout << GREEN << "create path: " << END << dst.parent_path()
+				<< std::endl;
+		std::filesystem::create_directories(dst.parent_path());
+	}
+
 	const auto modify_time = std::filesystem::last_write_time(src);
 	std::cout << GREEN << "copy rom: " << END << dst << std::endl;
 	try {

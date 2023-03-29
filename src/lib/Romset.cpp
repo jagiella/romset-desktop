@@ -100,7 +100,7 @@ void Romset::set_url(std::string url) {
 	//std::cout << "-> url: " << url << std::endl;
 }
 
-std::unordered_map<std::string, std::list<std::shared_ptr<Rom>>> Romset::roms() {
+const std::unordered_map<std::string, std::list<std::shared_ptr<Rom>>>& Romset::roms() {
 	return m_roms;
 }
 
