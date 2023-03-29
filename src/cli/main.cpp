@@ -225,10 +225,11 @@ int main(int argc, char **argv) {
 							std::list<Match> matches) {
 						//matches.back().second.
 
-						for (auto match : matches) {
+						auto last = --matches.end();
+						for (auto match =matches.begin(); match!=matches.end(); match++) {
 							std::filesystem::path dst_path;
-							auto romset = match.first;
-							auto rom = match.second;
+							auto romset = match->first;
+							auto rom = match->second;
 							auto game = rom->game();
 
 							if (game->roms().size() == 1)
@@ -237,9 +238,14 @@ int main(int argc, char **argv) {
 							else if (game->roms().size() > 1)
 								dst_path = target_directory / romset->name()
 										/ game->name() / rom->filename();
-							copy_rom(src_path, dst_path);
+
+							if(match == last){
+								move_rom(src_path, dst_path);
+							}else{
+								copy_rom(src_path, dst_path);
+							}
 						}
-						remove_rom(src_path);
+						//remove_rom(src_path);
 						/*if (matches.size() == 1) {
 						 move_rom(p,
 						 target_directory
